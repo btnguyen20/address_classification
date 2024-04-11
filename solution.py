@@ -96,14 +96,20 @@ class Solution:
 
     def get_districts(self, province_code):
         districts = []
-        result = self.district_db.find({'parent_code': province_code}, {'slug': True, 'code': True, 'parent_code': True})
+        if province_code:
+            result = self.district_db.find({'parent_code': province_code}, {'slug': True, 'code': True, 'parent_code': True})
+        else:
+            result = self.district_db.find({}, {'slug': True, 'code': True, 'parent_code': True})
         for district in result:
             districts.append(district)
         return districts
 
     def get_wards(self, district_code):
         wards = []
-        result = self.ward_db.find({'parent_code': district_code}, {'slug': True, 'code': True, 'parent_code': True})
+        if district_code:
+            result = self.ward_db.find({'parent_code': district_code}, {'slug': True, 'code': True, 'parent_code': True})
+        else:
+            result = self.ward_db.find({}, {'slug': True, 'code': True, 'parent_code': True})
         for ward in result:
             wards.append(ward)
         return wards
@@ -123,38 +129,50 @@ class Solution:
         input_province, input_district, input_ward = self.split_input(s)
 
         # Find the province
-        all_province_distances = {}
-        for province in self.provinces:
-            distance = self.levenshtein_distance(input_province, province['slug'].replace('-', ''))
-            all_province_distances[province['code']] = distance
-        matched_province_code = self.find_min_distance(all_province_distances)
-        if matched_province_code == None:
-            matched_provine_name = ''
+        if input_province:
+            all_province_distances = {}
+            for province in self.provinces:
+                distance = self.levenshtein_distance(input_province, province['slug'].replace('-', ''))
+                all_province_distances[province['code']] = distance
+            matched_province_code = self.find_min_distance(all_province_distances)
+            if matched_province_code == None:
+                matched_provine_name = ''
+            else:
+                matched_provine_name = self.get_matched_province(matched_province_code)
         else:
-            matched_provine_name = self.get_matched_province(matched_province_code)
+            matched_provine_name = ''
+            matched_province_code = None
         
         # Find the district
-        districts = self.get_districts(matched_province_code)
-        all_district_distances = {}
-        for district in districts:
-            distance = self.levenshtein_distance(input_district, district['slug'].replace('-', ''))
-            all_district_distances[district['code']] = distance
-        matched_district_code = self.find_min_distance(all_district_distances)
-        if matched_district_code == None:
+        if input_district:
+            districts = self.get_districts(matched_province_code)
+            all_district_distances = {}
+            for district in districts:
+                distance = self.levenshtein_distance(input_district, district['slug'].replace('-', ''))
+                all_district_distances[district['code']] = distance
+            matched_district_code = self.find_min_distance(all_district_distances)
+            if matched_district_code == None:
+                matched_district_name = ''
+            else:
+                matched_district_name = self.get_matched_district(matched_district_code)
+        else:
             matched_district_name = ''
-        else:
-            matched_district_name = self.get_matched_district(matched_district_code)
+            matched_district_code = None
         
-        wards = self.get_wards(matched_district_code)
-        all_wards_distances = {}
-        for ward in wards:
-            distance = self.levenshtein_distance(input_ward, ward['slug'].replace('-', ''))
-            all_wards_distances[ward['code']] = distance
-        matched_ward_code = self.find_min_distance(all_wards_distances)
-        if matched_ward_code == None:
-            matched_ward_name = ''
+        if input_ward:
+            wards = self.get_wards(matched_district_code)
+            all_wards_distances = {}
+            for ward in wards:
+                distance = self.levenshtein_distance(input_ward, ward['slug'].replace('-', ''))
+                all_wards_distances[ward['code']] = distance
+            matched_ward_code = self.find_min_distance(all_wards_distances)
+            if matched_ward_code == None:
+                matched_ward_name = ''
+            else:
+                matched_ward_name = self.get_matched_ward(matched_ward_code)
         else:
-            matched_ward_name = self.get_matched_ward(matched_ward_code)
+            matched_ward_name = ''
+            matched_ward_code = None
 
         return {
             "province": matched_provine_name,
