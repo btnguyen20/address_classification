@@ -81,7 +81,26 @@ class Solution:
         return min(distances, key=distances.get)
     
     def split_input(self, s: str):
-        ward, district, province = s.split(',')
+        try:
+            if ',' in s:
+                text = s.split(',')
+                if len(text) >= 3:
+                    province = text[-1]
+                    district = text[-2]
+                    ward = text[-3]
+                else:
+                    if len(text[-1]) > 17:
+                        province = s[-11:]
+                    else:
+                        province = text[-1]
+                    district = s[:-len(province)]
+                    ward = s[:-len(province)]
+            else:
+                province = s[-11:]
+                district = s[-31:-11]
+                ward = s[:-31]
+        except:
+            pass
         province = unidecode(province).lower().replace(' ', '')
         district = unidecode(district).lower().replace(' ', '')
         ward = unidecode(ward).lower().replace(' ', '')
