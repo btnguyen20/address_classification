@@ -178,7 +178,7 @@ class Solution:
             matched_district_name = ''
             matched_district_code = None
         
-        if input_ward:
+        if input_ward & matched_district_code:
             wards = self.get_wards(matched_district_code)
             all_wards_distances = {}
             for ward in wards:
